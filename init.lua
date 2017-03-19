@@ -1,5 +1,8 @@
--- Begin WiFi configuration
+-- Turn solenoid OFF (up)
+gpio.mode(0,gpio.OUTPUT)
+gpio.write(0,0)
 
+-- Begin WiFi configuration
 local wifiConfig = {}
 
 -- wifi.STATION         -- station: join a WiFi network
