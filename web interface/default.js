@@ -1,20 +1,99 @@
+
+var circleDiameter;
+var noOfBeatsInSequence = 8;
+var tileWidth;
+// BPM
+var interval = 100; 
+// TIMER
+var timeout;
+var pointer = 0;
+var previousPointer = 0;
+// ELEMENTS
+var beats = $("#beats");
+var tile = $("#beats li");
+var circle = $("#beats li .circle");
+
+
+// SEQUENCER
+var activeSequence = [0,0,0,0,0,0,0,0];
+
 $(document).ready(function(){
 
-var beats = $("#beats");
-var noOfBeatsInSequence = 8;
+// RESIZE
+resizeHandler();
 
-console.log(beats.children(function(e)).each());
-$("#beats li").each(function(){console.log(this)})
-//updateBeats()
+
+// EVENT LISTENERS
+
+// LISTEN ON TILE CLICK
+tile.on('click',function(){
+$(this).toggleClass("selected");
+})
+
+// Listen for resize changes
+window.addEventListener("resize", function() {
+ resizeHandler();
+
+}, false);
+
+	initTimer();
 
 })
 
+
+
 // SETUP BEATS
-function updateBeats(beatsNo)
+function updateBeats(previousPointer,currentPointer)
 {
+
+   			//console.log($( "#beats li:eq( "+(beatsNo+1)+" )" ));
+$( "#beats li:eq( "+previousPointer+" )" ).toggleClass("active");
+$( "#beats li:eq( "+currentPointer+" )" ).toggleClass("active");
+
+}
+
+function resizeHandler()
+{
+
+// BEAT 
+tileWidth = (100/noOfBeatsInSequence);
+tile.each(function(){$(this).css('width',tileWidth+"%")});
+// BALLS
+circleDiameter = tile.width()*0.33;
+circle.each(function(){$(this).css({'height':circleDiameter,'width':circleDiameter,'top':circleDiameter,'left':circleDiameter})});
 
 
 }
+
+function initTimer()
+	{
+		
+		var expected = Date.now() + interval;
+		setTimeout(step, interval);
+
+		function step() {
+   			 var dt = Date.now() - expected; // the drift (positive for overshooting)
+   			 if (dt > interval) {
+       		 // something really bad happened. Maybe the .rower (tab) was inactive?
+       		 // possibly special handling to avoid futile "catch up" run
+  			  }
+
+
+updateBeats(previousPointer,pointer);
+previousPointer = pointer;
+pointer = (pointer+1)%8;
+    			
+  			  //pointer = (pointer+1)%8;
+  			 // console.log(pointer);
+   			// UPDATE POINTER
+   			console.log("tick");
+
+   			// CALCULATE DELAY IF ANY
+    		expected += interval;
+    		timeout = setTimeout(step, Math.max(0, interval - dt)); // take into account drift
+		}
+	}
+
 
 /*$(document).ready(function() {
 		
@@ -135,48 +214,7 @@ $("#bpm").on("change",function(){
 
 	}
 
-	function initTimer()
-	{
-		
-		var expected = Date.now() + interval;
-		setTimeout(step, interval);
-
-		function step() {
-   			 var dt = Date.now() - expected; // the drift (positive for overshooting)
-   			 if (dt > interval) {
-       		 // something really bad happened. Maybe the .rower (tab) was inactive?
-       		 // possibly special handling to avoid futile "catch up" run
-  			  }
-   			//console.log("tick");
-   			//console.log(pointer);
-
-   			// HIGHLIGHT TILE
-   			tiles[pointer].className = "tick-box pointer"
-   			// DEACTIVATE PREVIOUS TILE
-   			tiles[previousPointer].className = "tick-box"
-   			//console.log(pointer+" _ "+previousPointer);
-   			
-   			// SEND TICK SIGNAL IF ACTIVE
-   			//`console.log(activeTiles[pointer]==1);
-   			if(activeTiles[pointer]==1 && tickerIP!="") {
-   				console.log("HIT 1\n"); console.log("Send");$.get("http://"+tickerIP+"/",{tick:""})
-   				//console.log("HIT 2\n"); console.log("Send");$.get("http://192.168.43.96/",{tick:""})
-
-//   				console.log("HIT 2\n"); console.log("Send");$.get("http://192.168.43.100/",{tick:""})
-   			}
-
-   			// UPDATE POINTER
-   			pointer         = (pointer+1)%8;
-   			previousPointer = (previousPointer+1)%8;
-
-
-   			// CALCULATE DELAY IF ANY
-    		expected += interval;
-    		timeout = setTimeout(step, Math.max(0, interval - dt)); // take into account drift
-		}
-	}
-
-	initTimer(1000);
+	
 
 	})
 

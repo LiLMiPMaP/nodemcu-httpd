@@ -91,17 +91,52 @@ position:absolute;
 	}
 #sequence
 {
+position: relative;
+height:100%;
 	
 }
 
 ul#beats{
-
+position: relative;
+height:100%;
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
+  display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
 }
 
 li.beat{
+list-style: none;
+height:100%;
+display: inline-block;
+border:1px solid #999999;
+}
+
+li.beat>.circle
+{
+	position:relative;
+	width:33%;
+	background-color:black;
+	border: solid 2px black;/**/
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 50%;
 
 }
- 
+
+li.beat.selected{
+	background-color:black;
+} 
+li.beat.active{
+	background:transparent url("assets/pattern_active.png") repeat scroll 0% 0%;
+}
+li.beat.selected.active{
+	background:transparent url("assets/pattern_active_selected.png") repeat scroll 0% 0%;
+}
+li.beat.selected>.circle{
+	background-color:white;
+} 
 /*
 //
 // ALL SEQUENCES
