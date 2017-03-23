@@ -4,53 +4,89 @@
 
 var bpm=119
 
-function play1(ip,p) {
-    p = p.replace(/[^ofXx-]/g,'').replace(/-/g,'0').replace(/[^0]/g,'1');
-    var url = ip+"/ss.lua?r=5&bpm="+bpm+"&p="+p;
-    //console.log(url)
+function post(url) {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", url);
+    xhr.open("POST", url, true);
     xhr.send("");
+}
+
+function play1(ip,p) {
+    p = p.replace(/[^#ofXx-]/g,'').replace(/-/g,'0').replace(/[^0]/g,'1');
+    var url = ip+"/ss.lua?r=4&bpm="+bpm+"&p="+p;
+    post(url)
     return p.length
 }
 
 var timeoutid=0;
+
 function play(e) {
 
     var text = document.getElementById('tab').value;
-    var hihat = text.match(/^ C:([-ofXx|]+)/gm);
-    var snare = text.match(/^HH:([-ofXx|]+)/gm);
-    var bass  = text.match(/^ B:([-ofXx|]+)/gm);
+    var hihatRegex = /^ S:([|#ofXx-]+)/gm;
+    var snareRegex = /^HH:([|#ofXx-]+)/gm;
+    var bassRegex  = /^ B:([|#ofXx-]+)/gm;
+    var crashRegex = /^ C:([|#ofXx-]+)/gm;
 
-    function play3(p){
-        var l1 = play1("http://192.168.100.169", hihat[p]);
-        var l2 = play1("http://192.168.100.144", snare[p]);
-        var l3 = play1("http://192.168.100.228", bass[p]);
-        console.log(l1)
-        timeoutid = window.setTimeout(function(){play3(p+1);}, l1*15000/bpm);
+    var hihat = hihatRegex.exec(text);
+    var snare = snareRegex.exec(text);
+    var bass = bassRegex.exec(text);
+    var crash = crashRegex.exec(text);
+    function play3(l1){
+        if (hihat) l1 = play1("http://192.168.100.169", hihat[1]);
+        if (l1) timeoutid = window.setTimeout(play3, l1*15000/bpm);
+        if (snare) play1("http://192.168.100.144", snare[1]);
+        if (crash) play1("http://192.168.100.228", crash[1]);
+        if (bass) play1("http://192.168.100.181", bass[1]);
+        hihat = hihatRegex.exec(text);
+        snare = snareRegex.exec(text);
+        bass = bassRegex.exec(text);
+        crash = crashRegex.exec(text);
     }
 
-    play3(0);
+    play3();
 }
 
 function stop(e) {
-    play1("http://192.168.100.169", '');
-    play1("http://192.168.100.144", '');
-    play1("http://192.168.100.228", '');
     window.clearTimeout(timeoutid);
+    post("http://192.168.100.169/ss.lua");
+    post("http://192.168.100.144/ss.lua");
+    post("http://192.168.100.228/ss.lua");
+    post("http://192.168.100.181/ss.lua");
 }
 
 function init() {
 
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://soundswarm.azurewebsites.net/allip', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        var macs = JSON.parse(xhr.responseText);
+        var select = document.getElementById('ips');
+        for (var mac in macs) {
+            var option = document.createElement("option");
+            option.appendChild(document.createTextNode(macs[mac]));
+            select.appendChild(option);
+        }
+    };
+    xhr.send();
+
     document.getElementById('play').addEventListener('click', play);
     document.getElementById('stop').addEventListener('click', stop);
-    document.getElementById('bpm').addEventListener('change', function(e) {bpm = e.value;})
+    document.getElementById('bpm').addEventListener('input', function(e) {
+        bpm = e.target.value;
+        post("http://192.168.100.169/ss.lua?bpm="+bpm);
+        post("http://192.168.100.144/ss.lua?bpm="+bpm);
+        post("http://192.168.100.228/ss.lua?bpm="+bpm);
+        post("http://192.168.100.181/ss.lua?bpm="+bpm);
+    })
 }
 
 window.addEventListener('load', init);
 </script>
 <body>
-<p><button id="play">Play!</button><button id="stop">Stop!</button><input type="number" id="bpm" value="119">
+<p>
+    <button id="play">Play!</button><button id="stop">Stop!</button><input type="number" id="bpm" value="119">
+    <select size="1" id="ips"></select>
 </p>
 <textarea id="tab" style="height:90vh;width:90vw;font-family: courier">
 INTRO
@@ -69,7 +105,6 @@ HH:|----o---o---o---|----o---o---o---|----o---o---o---|----o---o-------|
  S:|----o--o-o--o---|----o--o-o--o---|----o--o-o--o---|----o-----oooooo|
  B:|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|o--o--o-o-------|
 
- C:|----------------|----------------|----------------|----------------|
 HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
@@ -80,6 +115,7 @@ HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
 
+ C:|----------------|----------------|----------------|----------------|
 HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-o---|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
@@ -107,6 +143,7 @@ HH:|----o---o---o---|----o---o---o---|----o---o---o---|----o---o---o---|
  B:|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|
 
  C:|X---X---X---X---|X---X---X---X---|X---X---X---X---|X---X---X---X---|
+HH:|----------------|----------------|----------------|----------------|
  S:|----o--o-o--o---|----o--o-o--o---|----o--o-o--o---|----o---o---o---|
  B:|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|o--o--oo--oo--o-|
 
@@ -117,15 +154,18 @@ HH:|----o---o-------|----o-----o---o-|----o---o-------|----o---o-------|
 FT:|----------------|------------o---|----------------|----------------|
  B:|o-o---oo--o-----|o-o----o-o-o-o-o|o-o---oo--o-----|o-o---o-o-------|
 
+ C:|----------------|----------------|----------------|----------------|
 HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
 
 VERSE
+ C:|----------------|----------------|----------------|----------------|
 HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
 
+ C:|----------------|----------------|----------------|----------------|
 HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-o---|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
@@ -189,10 +229,12 @@ HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
 
 VERSE
+ C:|----------------|----------------|----------------|----------------|
 HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
 
+ C:|----------------|----------------|----------------|----------------|
 HH:|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-o---|
  S:|----o-------o---|----o-------o---|----o-------o---|----o-------o---|
  B:|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|o-o-----o-o-----|
@@ -220,19 +262,24 @@ HH:|----o---o---o---|----o---o---o---|----o---o---o---|----o---o---o---|
  B:|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|
 
  C:|X---X---X---X---|X---X---X---X---|X---X---X---X---|X---X---X---X---|
+HH:|----------------|----------------|----------------|----------------|
  S:|----o--o-o--o---|----o--o-o--o---|----o--o-o--o---|----o--o-o--o---|
  B:|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|o--o----o-oo--o-|
 
 OUTRO
  C:|X---X---X---X---|X---X---X---X---|X---X---X---X---|X---X---X---X---|
+HH:|----------------|----------------|----------------|----------------|
  S:|----o---o---o---|----o---o---o---|----o---o---o---|----o---o---o---|
  B:|o--o---o-o-o--o-|o--o---o-o-o--o-|o--o---o-o-o--o-|o--o---o-o-o--o-|
 
  C:|X---X---X---X---|X---X---X---X---|X---X---X---X---|X---X---X-------|
+HH:|----------------|----------------|----------------|----------------|
  S:|----o---o---o---|----o---o---o---|----o---o---o---|----o---o---f---|
  B:|o--o---o-o-o--o-|o--o---o-o-o--o-|o--o---o-o-o--o-|o--o---o-o-o--o-|
 
  C:|X---------------|
+HH:|----------------|
+ S:|----------------|
  B:|o---------------|
 </textarea>
 </body>

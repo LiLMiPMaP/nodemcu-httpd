@@ -10,11 +10,11 @@
 
 local requests = {}
 
-local function onConnect(connection)
+local function close(c)
+  c:close()
+end
 
-  local function close()
-    connection:close()
-  end
+local function onConnect(connection)
 
   local function onReceive(connection, request)
     collectgarbage()
@@ -148,14 +148,27 @@ local function onConnect(connection)
   connection:on("receive", onReceive)
 end
 
+
 return function (port)
+
   local s = net.createServer(net.TCP, 28800) -- 10 seconds client timeout
   s:listen(port, onConnect)
 
   -- false and nil evaluate as false
   local ip = wifi.sta.getip()
-  if not ip then ip = wifi.ap.getip() end
-  print("nodemcu-httpserver running at http://" .. ip .. ":" ..  port)
+  local mac = wifi.sta.getmac()
+  if not ip then ip = wifi.ap.getip() mac = wifi.ap.getmac() end
+
+  print("nodemcu-httpd running at http://" .. ip .. ":" ..  port)
+
+  -- register with backend
+  local http = net.createConnection(net.TCP, 0)
+  http:on("connection", function(c)
+    print(mac)
+    c:send("PUT /ip?mac=" .. mac .. "&ip=" .. ip ..
+      " HTTP/1.1\r\nHost: soundswarm.azurewebsites.net\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", close)
+  end)
+  http:connect(80, "23.99.110.192")
+
   return s
 end
-

@@ -1,50 +1,63 @@
 -- curl -d '' 'http://192.168.100.169/ss.lua?p=11101001001000111&bpm=200'
+
+local function stop()
+  print("Stopped.")
+  if timer then
+    timer:unregister()
+    timer = nil
+  end
+  gpio.write(0,0)
+  pattern = nil
+  collectgarbage()
+end
+
+
+local beat = 0
+local ratio = 4
+
+local function tap()
+  if beat == 0 then
+    gpio.write(0,tonumber(pattern:sub(1,1)))
+    pattern = pattern:sub(2)
+  elseif beat == 1 then
+    gpio.write(0,0)
+  end
+  beat = beat + 1
+  if beat >= ratio then
+    beat = 0
+    if pattern == "" then
+      stop()
+    end
+  end
+end
+
+
 return function(connection, req)
 
-  local ratio = req:match("r=([1-9])")
-  if not ration then
-    ratio = 2
-  end
+  local p = req:match("p=([01]+)")
+  if p then pattern = p end
 
-  local p = req:match("p=([01]*)")
-  if p then
+  local r = req:match("r=([1-9])")
+  if r then ratio = tonumber(r) end
 
-    print(p)
-    local bpm = req:match("bpm=([0-9]+)")
+  local bpm = req:match("bpm=([0-9]+)")
+  if bpm and pattern then
+
     if not timer then
+      print("Started bpm="..bpm)
       timer = tmr.create()
     else
+      print("New bpm="..bpm)
       timer:unregister()
     end
 
-    local beat = 0
-
-    local function tap()
-        print(beat)
-        if beat == 0 then
-          gpio.write(0,tonumber(p:sub(1,1)))
-          p = p:sub(2)
-        elseif beat == 1 then
-          gpio.write(0,0)
-        end
-        beat = beat + 1
-        if beat >= ratio then
-          beat = 0
-          if p == "" then
-            timer:stop()
-          end
-        end
-    end
-
-    if not bpm then
-      bpm = 120
-    end
-
+    tap()
     timer:alarm(15000/(bpm*ratio), tmr.ALARM_AUTO, tap)
   else
 
-    timer:stop()
+    stop()
   end
 
-  connection:send("HTTP/1.1 204 No Content\r\n\r\n", function(c) c:close() end)
+  connection:send("HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n", function(c) c:close() end)
+  collectgarbage()
 end
