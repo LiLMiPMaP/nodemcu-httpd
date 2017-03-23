@@ -1,4 +1,22 @@
-$(document).ready(function() {
+$(document).ready(function(){
+
+var beats = $("#beats");
+var noOfBeatsInSequence = 8;
+
+console.log(beats.children(function(e)).each());
+$("#beats li").each(function(){console.log(this)})
+//updateBeats()
+
+})
+
+// SETUP BEATS
+function updateBeats(beatsNo)
+{
+
+
+}
+
+/*$(document).ready(function() {
 		
 		// ARRAY CONTAINING ACTIVE TILES
 		var activeTiles      = [0,0,0,0,0,0,0,0];
@@ -169,5 +187,5 @@ $("#bpm").on("change",function(){
 function ValidateIPaddress(inputValue) {
   var re = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
   return re.test(inputValue);
-}
+}*/
 
