@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;"> 
+  <!--   <meta name="viewport" content="width=devicewidth, minimal-ui"> -->
+    <!-- for ios 7 style, multi-resolution icon of 152x152 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-barstyle" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-152.png">
+<!-- for Chrome on Android, multi-resolution icon of 196x196 -->
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="shortcut icon" sizes="196x196" href="icon-196.png">
+
+    <title>SoundSwarm - Button mode</title>
+    <link rel="stylesheet" type="text/css" href="normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body id="button-mode">
+    <div id="wrapper">
+        <div id="speed-container">
+            <div id="speed-fill"></div>
+            <div id="speed-value"></div>
+        </div>
+    	<div id="button-container">
+        <div id="button">
+            <div class="circle"></div>
+        </div>	
+        </div>
+    	<div id="controls-container">
+            <div id="button-set-3">
+                <div id="switch-UI" class="icon">
+                    <img src="assets/icon-switch.png" />
+                </div>
+            </div>      
+        </div>
+    </div>
+
+    <script type="text/javascript" src="hammer.min.js"></script>
+    <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="jquery.hammer.js"></script>
+    <script type="text/javascript" src="default.js"></script>
+</body>
+
+</html>

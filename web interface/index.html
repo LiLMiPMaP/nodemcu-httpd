@@ -3,19 +3,29 @@
 
 <head>
     <meta charset="utf-8">
-    <title>SoundThing</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+  <!--   <meta name="viewport" content="width=devicewidth, minimal-ui"> -->
+    <!-- for ios 7 style, multi-resolution icon of 152x152 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-barstyle" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-152.png">
+<!-- for Chrome on Android, multi-resolution icon of 196x196 -->
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="shortcut icon" sizes="196x196" href="icon-196.png">
+
+    <title>SoundSwarm - Sequence mode</title>
     <link rel="stylesheet" type="text/css" href="normalize.min.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
-<body>
+<body id="sequence-mode">
     <div id="wrapper">
     	<div id="bpm-container">
     		<div id="bpm-fill"></div>
     		<div id="bpm-value"></div>
     	</div>
     	<div id="single-sequence-container">
-            <div id="sequence">
+            <div id="sequence-active">
                  <ul id="beats">
                      <li class="beat active"><div class="circle"></div></li>
                      <li class="beat"><div class="circle"></div></li>
@@ -28,22 +38,37 @@
                  </ul>
              </div> 
         </div>
-    	<div id="all-sequences-container"></div>
+    	<div id="all-sequences-container">
+         <div class="sequence">
+             <div class="tile"></div>
+             <div class="tile"></div>
+             <div class="tile"></div>
+             <div class="tile"></div>
+             <div class="tile"></div>
+             <div class="tile"></div>
+             <div class="tile"></div>
+             <div class="tile"></div>
+         </div>   
+        </div>
     	<div id="controls-container">
          <div id="button-set-1">
-            <div id="play-stop"><div class="placeholder-icon"></div></div>
-            <div id="clear-all"><div class="placeholder-icon"></div></div>
+            <div id="play-stop" class="icon"><img src="assets/icon-play.png" /><img class="hide" src="assets/icon-pause.png" /></div>
+            <div id="clear-all" class="icon"><img src="assets/icon-clear.png" /></div>
+            
+         <div id="add" class="icon"><img src="assets/icon-add.png" /></div>
+         <div id="remove" class="icon"><img src="assets/icon-remove.png" /></div>
          </div>
          <div id="button-set-2">
-         <div id="add"><div class="placeholder-icon"></div></div>
-         <div id="remove"><div class="placeholder-icon"></div></div>
          </div>
          <div id="button-set-3">
-         <div id="switch-UI"><div class="placeholder-icon"></div></div>
+         <div id="switch-UI" class="icon"><img src="assets/icon-switch.png" /></div>
          </div>      
         </div>
     </div>
+
+    <script type="text/javascript" src="hammer.min.js"></script>
     <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="jquery.hammer.js"></script>
     <script type="text/javascript" src="default.js"></script>
 </body>
 
