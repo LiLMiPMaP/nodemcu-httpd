@@ -75,6 +75,8 @@ position:absolute;
 	width:95%;
 	height:10%;
 	left:5%;
+	    white-space: nowrap;
+	overflow-x:scroll;
 }
 #controls-container
 {
@@ -125,7 +127,7 @@ height:100%;
 	
 }
 
-ul#beats{
+ul#sequence{
 position: relative;
 height:100%;
   display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
@@ -189,16 +191,29 @@ li.beat.selected.active{
 // ALL SEQUENCES
 //
 */
-.sequence
+.sequence-mini
 {
 	display: inline-block;
 position:relative;
-
+border-collapse: collapse;
 }
-.tile
+.beat-mini
 {
+	position:relative;
+	height:100%;
 	display: inline-block;
 border:2px solid black;
+border-right:none;
+
+background-color:white;
+}
+.beat-mini.selected
+{
+background-color:black;
+}
+.beat-mini:nth-last-child(1)
+{
+border-right:2px solid black;
 }
 /*
 //
