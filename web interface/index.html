@@ -16,13 +16,14 @@
     <title>SoundSwarm - Sequence mode</title>
     <link rel="stylesheet" type="text/css" href="normalize.min.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="rangeslider.css">
 </head>
 
 <body id="sequence-mode">
     <div id="wrapper">
     	<div id="bpm-container">
-    		<div id="bpm-fill"></div>
-    		<div id="bpm-value"></div>
+        <div id="bpm-value" >value</div>
+    		<input type="range" min="1" max="300" step="1" value="150" data-orientation="vertical" data-rangeslider>
     	</div>
     	<div id="single-sequence-container">
             <div id="sequence-active">
@@ -39,7 +40,7 @@
              </div> 
         </div>
     	<div id="all-sequences-container">
-          
+
         </div>
     	<div id="controls-container">
          <div id="button-set-1">
@@ -59,6 +60,7 @@
 
     <script type="text/javascript" src="hammer.min.js"></script>
     <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="rangeslider.min.js"></script>
     <script type="text/javascript" src="jquery.hammer.js"></script>
     <script type="text/javascript" src="default.js"></script>
 </body>

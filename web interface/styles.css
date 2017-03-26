@@ -92,17 +92,18 @@ position:absolute;
 //
 */
 #bpm-value{
-
-}
-#bpm-fill{
-	position: relative;
+    position: absolute;
     width: 100%;
-    height: 80%;
-    top: 0%;
-    background-color: white;
-}
-#speed-value{
+    color: white;
+    bottom:0;
+    z-index: 1000;
+    text-align: center;
 
+display:none;
+
+}
+#bpm-value.visible{
+display:block;
 }
 #speed-fill{
 		position: relative;

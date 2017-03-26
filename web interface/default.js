@@ -8,6 +8,7 @@ var windowWidth;
 var windowHeight;
 var noOfSequences = 1;
 var activeSequence = 0;
+var bpmValue = 150;
 
 // BPM
 var interval = 500;
@@ -16,7 +17,7 @@ var timeout;
 var pointer = 0;
 var previousPointer = 0;
 // ELEMENTS
-var bpm, bmpFill, sequence, beat, circle, controls, icons, w, buttonContainer, button, allSequencesContainer, sequenceMini, beatMini, playButton, clearButton, addButton, removeButton;
+var bpm, bpmValueText, sequence, beat, circle, controls, icons, w, buttonContainer, button, allSequencesContainer, sequenceMini, beatMini, playButton, clearButton, addButton, removeButton;
 
 
 // SEQUENCER
@@ -31,7 +32,7 @@ $(document).ready(function() {
     // ELEMENTS
     w = $(window);
     bpm = $("#bpm-container");
-    bpmFill = $("#bpm-fill");
+    bpmValueText = $("#bpm-value");
     sequence = $("#sequence");
     beat = $("#sequence li");
     circle = $(".circle");
@@ -71,6 +72,37 @@ $(document).ready(function() {
     // Launch fullscreen for browsers that support it!
     launchIntoFullscreen(document.documentElement); // the whole page
 
+// UPDATE SLIDER
+    $('input[type="range"]').rangeslider({
+         polyfill: false,
+         // Callback function
+    onInit: function() {
+
+    },
+
+    // Callback function
+    onSlide: function(position, value) {
+        bpm.css({width:"10%"});
+        bpmValue = value;
+        bpmValueText.text(value);
+        bpmValueText.addClass("visible").css((value<150)? {bottom:"inherit",color:"black"}:{bottom:"0",color:"white"});
+
+    },
+
+    // Callback function
+    onSlideEnd: function(position, value) {
+        bpm.css({width:"5%"});
+
+        bpmValueText.removeClass("visible");
+    }
+     }); ;    
+
+// $('input').on('input', function () {    
+//     console.log($(this).val());
+// });
+
+
+
     $('#switch-UI').hammer().bind('tap', function() {
         window.location.href = (mode) ? "/button" : "/";
     });
@@ -101,9 +133,9 @@ $(document).ready(function() {
 
 
         // SEND REQUEST
-        // var xhr = new XMLHttpRequest();                        
-        // xhr.open('POST','http://192.168.43.147/ss.lua?bpm=120&p=1',true);                        
-        // xhr.send('');
+         // var xhr = new XMLHttpRequest();                        
+         // xhr.open('POST','http://192.168.100.181/ss.lua?bpm=100&p=1'/*&r=4*/,true);                        
+         // xhr.send('');
 
         /*
         //
@@ -121,7 +153,7 @@ $(document).ready(function() {
                 //$(".beat-mini")[(activeSequence-1*8)+$(this).index()].toggleClass("selected");
                 // SMALL TILE
                 // $(".beat-mini:eq("+(activeSequence*8)+clickedId+1+")").toggleClass("selected");
-                console.log($(".beat-mini:eq(" + ((activeSequence * 8) + clickedId) + ")").toggleClass("selected"));
+                $(".beat-mini:eq(" + ((activeSequence * 8) + clickedId) + ")").toggleClass("selected");
                 sequenceData[activeSequence][clickedId] = (sequenceData[activeSequence][clickedId] == 1) ? 0 : 1;
 
             })
@@ -145,46 +177,58 @@ $(document).ready(function() {
                     allSequencesContainer.children().last().remove();
                     noOfSequences--;
                     sequenceData.pop();
-                    console.log(allSequencesContainer.children().length);
+                    pointer = 0;
+                    previousPointer = 0;
                 }
             })
             // PLAY/STOP BUTTON
         playButton.hammer().bind('tap', function() {
-        	console.log(jQuery.data(playButton, "state"));
-              // jQuery.data(playButton, "state",)=false;
-               jQuery.data(playButton, "state",(jQuery.data(playButton, "state"))? false:true);
+                console.log(jQuery.data(playButton, "state"));
+                // jQuery.data(playButton, "state",)=false;
+                jQuery.data(playButton, "state", (jQuery.data(playButton, "state")) ? false : true);
             })
-        // CLEAR BUTTON
-        clearButton.hammer().bind('tap',function(){
+            // CLEAR BUTTON
+        clearButton.hammer().bind('tap', function() {
 
-        	 if (confirm("Destroy everything?") == true) {
-       console.log("yes");
-      
-       noOfSequences = 1;
-       activeSequence = 0;
-var pointer = 0;
-var previousPointer = 0;
-var sequenceData = [[0, 0, 0, 0, 0, 0, 0, 0]];
-// REMOVE ALL CHILDREN EXCEPT OF ONE
-var noOfChildren = allSequencesContainer.children().length();
+                if (confirm("Destroy everything?") == true) {
+                    console.log("yes");
 
-for(var n=noOfChildren;n>1;n--)
-{
-allSequencesContainer.children().last().remove();
-}
+                    noOfSequences = 1;
+                    activeSequence = 0;
 
-    } else {
-       console.log("no");
-    }
-        })
+                    // MOVE POINTER TO 0
+                    var pointer = 0;
+                    var previousPointer = 0;
+
+                    // RESET ARRAY
+                    var sequenceData = [
+                        [0, 0, 0, 0, 0, 0, 0, 0]
+                    ];
+
+                    // REMOVE ALL CHILDREN EXCEPT OF ONE
+                    var noOfChildren = allSequencesContainer.children().length;
+
+                    // REMOVE ALL SEQUENCES EXCEPT ONE
+                    for (var n = noOfChildren; n > 1; n--) {
+                        allSequencesContainer.children().last().remove();
+                    }
+
+                    //CLEAR ALL BEATS
+                    $(".beat-mini").removeClass("selected");
+
+
+                } else {
+                    console.log("no");
+                }
+            })
             // BPMs
-        bpm.hammer({
+      /*  bpm.hammer({
             time: 0,
             threshold: 0
         }).bind('tap', function(e) {
             console.log("tPPED")
         });
-
+*/
 
         initTimer(1000);
 
@@ -201,7 +245,13 @@ allSequencesContainer.children().last().remove();
 
         button.hammer({}).bind('tap', function(e) {
             console.log("button pressed");
+            // SEND REQUEST
+         var xhr = new XMLHttpRequest();                        
+         xhr.open('POST','http://192.168.100.181/ss.lua?bpm=300&p=1'/*&r=4*/,true);                        
+         xhr.send('');
+         // CHANGE ACTIVE STATE
             buttonContainer.toggleClass("active");
+         // CHANGE BACK TO NORMAL STATE   
             setTimeout(function() {
                 buttonContainer.toggleClass("active");
             }, 50);
@@ -240,8 +290,8 @@ function resizeHandler() {
     if (mode) {
 
         // BPM
-        lastFillHeight = bpmFill.height();
-        fillMaxHeight = windowHeight * 0.85;
+        //lastFillHeight = bpmFill.height();
+        //fillMaxHeight = windowHeight * 0.85;
 
         // BEAT 
         beatWidth = (100 / noOfBeatsInSequence);
@@ -274,6 +324,9 @@ function resizeHandler() {
         beatMini.css({
             width: miniSequenceHeight
         });
+
+        // SIZE OF BPM TEXT
+        bpmValueText.css({"font-size":(windowWidth*0.05)+"px"});
 
 
     } else {
