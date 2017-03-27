@@ -194,10 +194,17 @@ li.beat.selected.active{
 */
 .sequence-mini
 {
+	height: 100%;
+	        top: 0;
 	display: inline-block;
 position:relative;
 border-collapse: collapse;
 }
+.sequence-mini.active
+{
+background-color:black;
+}
+
 .beat-mini
 {
 	position:relative;

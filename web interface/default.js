@@ -9,6 +9,8 @@ var windowHeight;
 var noOfSequences = 1;
 var activeSequence = 0;
 var bpmValue = 150;
+var lastBpmValue = bpmValue;
+var interval;
 
 // BPM
 var interval = 500;
@@ -72,38 +74,61 @@ $(document).ready(function() {
     // Launch fullscreen for browsers that support it!
     launchIntoFullscreen(document.documentElement); // the whole page
 
-// UPDATE SLIDER
+    // UPDATE SLIDER
     $('input[type="range"]').rangeslider({
-         polyfill: false,
-         // Callback function
-    onInit: function() {
+        polyfill: false,
+        // Callback function
+        onInit: function() {
 
-    },
+        },
 
-    // Callback function
-    onSlide: function(position, value) {
-        bpm.css({width:"10%"});
-        bpmValue = value;
-        bpmValueText.text(value);
-        bpmValueText.addClass("visible").css((value<150)? {bottom:"inherit",color:"black"}:{bottom:"0",color:"white"});
+        // Callback function
+        onSlide: function(position, value) {
+            bpm.css({
+                width: "10%"
+            });
+            bpmValue = value;
+            bpmValueText.text(value);
+            bpmValueText.addClass("visible").css((value < 150) ? {
+                bottom: "inherit",
+                color: "black"
+            } : {
+                bottom: "0",
+                color: "white"
+            });
 
-    },
+        },
 
-    // Callback function
-    onSlideEnd: function(position, value) {
-        bpm.css({width:"5%"});
+        // Callback function
+        onSlideEnd: function(position, value) {
+            bpm.css({
+                width: "5%"
+            });
+            bpmValueText.removeClass("visible");
 
-        bpmValueText.removeClass("visible");
-    }
-     }); ;    
+            // IF BPM HAS CHANGED UPDATE THE SPEED
+            if (bpmValue != lastBpmValue) {
+                
+                // STOP INTERVAL
+                clearRequestInterval(interval);
+                
+                // RESTART INTERVAL
+                step();
+                interval = requestInterval(step, 60000/bpmValue);
 
-// $('input').on('input', function () {    
-//     console.log($(this).val());
-// });
+            }
+
+            lastBpmValue = bpmValue;
+        }
+    });;
+
+    // $('input').on('input', function () {    
+    //     console.log($(this).val());
+    // });
 
 
 
-    $('#switch-UI').hammer().bind('tap', function() {
+    $('#switch-UI').hammer().on('tap', function() {
         window.location.href = (mode) ? "/button" : "/";
     });
 
@@ -124,6 +149,8 @@ $(document).ready(function() {
     */
 
     allSequencesContainer.append(sequenceMini);
+    // ACTIVATE SEQUENCE MINI
+    sequenceMini.addClass("active");
 
     resizeHandler();
 
@@ -133,9 +160,9 @@ $(document).ready(function() {
 
 
         // SEND REQUEST
-         // var xhr = new XMLHttpRequest();                        
-         // xhr.open('POST','http://192.168.100.181/ss.lua?bpm=100&p=1'/*&r=4*/,true);                        
-         // xhr.send('');
+        // var xhr = new XMLHttpRequest();                        
+        // xhr.open('POST','http://192.168.100.181/ss.lua?bpm=100&p=1'/*&r=4*/,true);                        
+        // xhr.send('');
 
         /*
         //
@@ -144,7 +171,7 @@ $(document).ready(function() {
         */
 
         // BEAT
-        beat.hammer().bind('tap', function() {
+        beat.hammer().on('tap', function() {
 
                 var clickedId = $(this).index();
 
@@ -158,7 +185,7 @@ $(document).ready(function() {
 
             })
             // ADD BUTTON
-        addButton.hammer().bind('tap', function() {
+        addButton.hammer().on('tap', function() {
                 var newSequenceMini = sequenceMini.clone();
                 // CLEAR THE NEW SEQUENCE FROM SELECTED BEATS
                 newSequenceMini.find(".beat-mini").removeClass("selected");
@@ -172,7 +199,7 @@ $(document).ready(function() {
             })
             // REMOVE BUTTON
             // NOTE: USE DETACH IN THE FUTURE
-        removeButton.hammer().bind('tap', function() {
+        removeButton.hammer().on('tap', function() {
                 if (noOfSequences > 1) {
                     allSequencesContainer.children().last().remove();
                     noOfSequences--;
@@ -182,17 +209,38 @@ $(document).ready(function() {
                 }
             })
             // PLAY/STOP BUTTON
-        playButton.hammer().bind('tap', function() {
-                console.log(jQuery.data(playButton, "state"));
-                // jQuery.data(playButton, "state",)=false;
-                jQuery.data(playButton, "state", (jQuery.data(playButton, "state")) ? false : true);
+        playButton.hammer().on('tap', function() {
+                var state = jQuery.data(playButton, "state");
+
+
+                if (state) {
+                    state = false;
+                    clearRequestInterval(interval);
+
+                } else {
+                    state = true;
+                    step();
+                    interval = requestInterval(step, bpmValue);
+                }
+
+                jQuery.data(playButton, "state", state);
+                console.log(state);
             })
             // CLEAR BUTTON
-        clearButton.hammer().bind('tap', function() {
+        clearButton.hammer().on('tap', function() {
 
                 if (confirm("Destroy everything?") == true) {
-                    console.log("yes");
+                    
+                    // IF SEQUENCE IS PLAYING STOP IT
+                    var state = jQuery.data(playButton, "state");
+                    
+                    if(state){
 
+                    	clearRequestInterval(interval);
+
+                     }
+
+                    // RESET ALL VALUES
                     noOfSequences = 1;
                     activeSequence = 0;
 
@@ -214,7 +262,12 @@ $(document).ready(function() {
                     }
 
                     //CLEAR ALL BEATS
+                    beat.removeClass("selected active");
                     $(".beat-mini").removeClass("selected");
+
+                    // RESTART SEQUENCE
+                    step();
+                    interval = requestInterval(step, bpmValue);
 
 
                 } else {
@@ -222,15 +275,16 @@ $(document).ready(function() {
                 }
             })
             // BPMs
-      /*  bpm.hammer({
+            /*  bpm.hammer({
             time: 0,
             threshold: 0
-        }).bind('tap', function(e) {
+        }).on('tap', function(e) {
             console.log("tPPED")
         });
 */
-
-        initTimer(1000);
+            // START SEQUENCE AND SET INTERVAL
+        step();
+        interval = requestInterval(step, bpmValue);
 
     } else {
 
@@ -243,15 +297,15 @@ $(document).ready(function() {
         //
         */
 
-        button.hammer({}).bind('tap', function(e) {
+        button.hammer({}).on('tap', function(e) {
             console.log("button pressed");
             // SEND REQUEST
-         var xhr = new XMLHttpRequest();                        
-         xhr.open('POST','http://192.168.100.181/ss.lua?bpm=300&p=1'/*&r=4*/,true);                        
-         xhr.send('');
-         // CHANGE ACTIVE STATE
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://192.168.100.181/ss.lua?bpm=300&p=1' /*&r=4*/ , true);
+            xhr.send('');
+            // CHANGE ACTIVE STATE
             buttonContainer.toggleClass("active");
-         // CHANGE BACK TO NORMAL STATE   
+            // CHANGE BACK TO NORMAL STATE   
             setTimeout(function() {
                 buttonContainer.toggleClass("active");
             }, 50);
@@ -316,17 +370,20 @@ function resizeHandler() {
         var clearance = (miniSequenceContainerHeight - miniSequenceHeight) * 0.5;
 
         sequenceMini.css({
-            height: miniSequenceHeight,
-            top: clearance,
+            
             left: clearance,
             "margin-right": clearance
         });
-        beatMini.css({
+        $(".beat-mini").css({
+        	height: miniSequenceHeight,
+            top: clearance,
             width: miniSequenceHeight
         });
 
         // SIZE OF BPM TEXT
-        bpmValueText.css({"font-size":(windowWidth*0.05)+"px"});
+        bpmValueText.css({
+            "font-size": (windowWidth * 0.05) + "px"
+        });
 
 
     } else {
@@ -361,48 +418,38 @@ function resizeHandler() {
         top: controlsSize / 10
     });
 
-    /*
-    //
-    // MULTIPLE SEQUENCES 
-    //
-    */
 
 }
 
-function initTimer() {
+function step() {
 
-    var expected = Date.now() + interval;
-    setTimeout(step, interval);
+    // UPDATE POINTER
+    updateBeats(previousPointer, pointer);
+    //console.log(pointer);
 
-    function step() {
-        var dt = Date.now() - expected; // the drift (positive for overshooting)
-        if (dt > interval) {
-            // something really bad happened. Maybe the .rower (tab) was inactive?
-            // possibly special handling to avoid futile "catch up" run
-        }
+    // MOVE TO NEXT SEQUENCE IF MORE THAN ONE UPDATE THE BEATS AND HIGHLIGHT IT
+    if (pointer == 0 && noOfSequences > 1) {
+    	
+    	var previousSequence = activeSequence;
+    	
+    	// REMOVE HIGHLIGHT FROM PREVIOUS SEQUENCE
+		$(".sequence-mini").eq( previousSequence ).removeClass("active");
+		
+		// HIGHLIGHT NEW SEQUENCE
+		activeSequence++;
+        activeSequence = activeSequence % noOfSequences;
+		$(".sequence-mini").eq( activeSequence ).addClass("active");
+        
+        console.log(activeSequence + " - " + noOfSequences);
+        updateSequence(activeSequence);
 
-        // UPDATE POINTER
-        updateBeats(previousPointer, pointer);
-        //console.log(pointer);
-
-        // MOVE TO NEXT SEQUENCE IF MORE THAN ONE
-        if (pointer == 0 && noOfSequences > 1) {
-            activeSequence++;
-            activeSequence = activeSequence % noOfSequences;
-            console.log(activeSequence + " - " + noOfSequences);
-            updateSequence(activeSequence);
-
-        }
-        // MOVE POINTER
-        previousPointer = pointer;
-        pointer = (pointer + 1) % 8;
-
-
-
-        // CALCULATE DELAY IF ANY
-        expected += interval;
-        timeout = setTimeout(step, Math.max(0, interval - dt)); // take into account drift
     }
+    // MOVE POINTER
+    previousPointer = pointer;
+    pointer = (pointer + 1) % 8;
+
+
+
 }
 
 function updateSequence(id) {
@@ -414,6 +461,54 @@ function updateSequence(id) {
 
 }
 
+/*!
+ * Behaves the same as setInterval except uses requestAnimationFrame() where possible for better performance
+ * modified gist.github.com/joelambert/1002116
+ * the fallback function requestAnimFrame is incorporated
+ * gist.github.com/joelambert/1002116
+ * gist.github.com/englishextra/873c8f78bfda7cafc905f48a963df07b
+ * jsfiddle.net/englishextra/sxrzktkz/
+ * @param {Object} fn The callback function
+ * @param {Int} delay The delay in milliseconds
+ * requestInterval(fn, delay);
+ */
+var requestInterval = function(fn, delay) {
+    var requestAnimFrame = (function() {
+            return window.requestAnimationFrame || function(callback, element) {
+                window.setTimeout(callback, 1000 / 60);
+            };
+        })(),
+        start = new Date().getTime(),
+        handle = {};
+
+    function loop() {
+        handle.value = requestAnimFrame(loop);
+        var current = new Date().getTime(),
+            delta = current - start;
+        if (delta >= delay) {
+            fn.call();
+            start = new Date().getTime();
+        }
+    }
+    handle.value = requestAnimFrame(loop);
+    return handle;
+};
+/*!
+ * Behaves the same as clearInterval except uses cancelRequestAnimationFrame()
+ * where possible for better performance
+ * gist.github.com/joelambert/1002116
+ * gist.github.com/englishextra/873c8f78bfda7cafc905f48a963df07b
+ * jsfiddle.net/englishextra/sxrzktkz/
+ * @param {Int|Object} handle function handle, or function
+ * clearRequestInterval(handle);
+ */
+var clearRequestInterval = function(handle) {
+    if (window.cancelAnimationFrame) {
+        window.cancelAnimationFrame(handle.value);
+    } else {
+        window.clearInterval(handle);
+    }
+};
 /*
 
 	function updateTiles()
