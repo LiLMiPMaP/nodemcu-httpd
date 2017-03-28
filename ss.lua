@@ -58,6 +58,6 @@ return function(connection, req)
     stop()
   end
 
-  connection:send("HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n", function(c) c:close() end)
+  connection:send("HTTP/1.1 204 No Content\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: POST,OPTIONS\r\nConnection: close\r\n\r\n", function(c) c:close() end)
   collectgarbage()
 end
