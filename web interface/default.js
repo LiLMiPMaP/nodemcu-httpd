@@ -11,13 +11,13 @@ var activeSequence = 0;
 var bpmValue = 150;
 var lastBpmValue = bpmValue;
 var interval;
+var ipAddress = "192.168.100.181";
 
 // BPM
 var interval = 500;
 // TIMER
-var timeout;
 var pointer = 0;
-var previousPointer = 0;
+var previousPointer = -1;
 // ELEMENTS
 var bpm, bpmValueText, sequence, beat, circle, controls, icons, w, buttonContainer, button, allSequencesContainer, sequenceMini, beatMini, playButton, clearButton, addButton, removeButton;
 
@@ -84,6 +84,7 @@ $(document).ready(function() {
 
         // Callback function
         onSlide: function(position, value) {
+           if(mode){
             bpm.css({
                 width: "10%"
             });
@@ -95,30 +96,36 @@ $(document).ready(function() {
             } : {
                 bottom: "0",
                 color: "white"
-            });
+            });}
+            else{
+
+            }
 
         },
 
         // Callback function
         onSlideEnd: function(position, value) {
-            bpm.css({
-                width: "5%"
-            });
-            bpmValueText.removeClass("visible");
+          if(mode){ bpm.css({
+                           width: "5%"
+                       });
+                       bpmValueText.removeClass("visible");
+           
+                       // IF BPM HAS CHANGED UPDATE THE SPEED
+                       if (bpmValue != lastBpmValue) {
+           
+                           // STOP INTERVAL
+                           clearRequestInterval(interval);
+           
+                           // RESTART INTERVAL
+                           step();
+                           interval = requestInterval(step, 60000 / bpmValue);
+           
+                       }
+           
+                       lastBpmValue = bpmValue;}
+                       else{
 
-            // IF BPM HAS CHANGED UPDATE THE SPEED
-            if (bpmValue != lastBpmValue) {
-                
-                // STOP INTERVAL
-                clearRequestInterval(interval);
-                
-                // RESTART INTERVAL
-                step();
-                interval = requestInterval(step, 60000/bpmValue);
-
-            }
-
-            lastBpmValue = bpmValue;
+                       }
         }
     });;
 
@@ -155,14 +162,7 @@ $(document).ready(function() {
     resizeHandler();
 
     if (mode) {
-        console.log("sequence");
-
-
-
-        // SEND REQUEST
-        // var xhr = new XMLHttpRequest();                        
-        // xhr.open('POST','http://192.168.100.181/ss.lua?bpm=100&p=1'/*&r=4*/,true);                        
-        // xhr.send('');
+    
 
         /*
         //
@@ -186,7 +186,7 @@ $(document).ready(function() {
             })
             // ADD BUTTON
         addButton.hammer().on('tap', function() {
-                var newSequenceMini = sequenceMini.clone();
+                var newSequenceMini = sequenceMini.clone().removeClass("active");
                 // CLEAR THE NEW SEQUENCE FROM SELECTED BEATS
                 newSequenceMini.find(".beat-mini").removeClass("selected");
                 // APPEND THE NEW SEQUENCE
@@ -201,11 +201,38 @@ $(document).ready(function() {
             // NOTE: USE DETACH IN THE FUTURE
         removeButton.hammer().on('tap', function() {
                 if (noOfSequences > 1) {
+                    // IF WE REMOVE THE ONE WE ARE PLAYING GO TO THE START
+                    if (noOfSequences - 1 == activeSequence) {
+
+                        // IF SEQUENCE IS PLAYING STOP IT
+                        var state = jQuery.data(playButton, "state");
+
+                        if (state) clearRequestInterval(interval);
+
+                        activeSequence = 0;
+
+                        //CLEAR ACTIVE BEATS
+                        beat.removeClass("selected active");
+
+                        // UPDATE BEATS WITH THE SEQUENCE 1 DATA
+                        updateSequence(0);
+
+                        // BRING POINTER TO START                        
+                    pointer = 0;
+                    previousPointer = -1;
+
+
+                    }
+                    console.log(activeSequence);
                     allSequencesContainer.children().last().remove();
                     noOfSequences--;
                     sequenceData.pop();
-                    pointer = 0;
-                    previousPointer = 0;
+
+                    // RESTART SEQUENCE IF IT WAS STOPED BY THE PROGRAM
+                    if (state) {
+                        step();
+                        interval = requestInterval(step, 60000 / bpmValue);
+                    }
                 }
             })
             // PLAY/STOP BUTTON
@@ -220,7 +247,7 @@ $(document).ready(function() {
                 } else {
                     state = true;
                     step();
-                    interval = requestInterval(step, bpmValue);
+                    interval = requestInterval(step, 60000 / bpmValue);
                 }
 
                 jQuery.data(playButton, "state", state);
@@ -229,24 +256,25 @@ $(document).ready(function() {
             // CLEAR BUTTON
         clearButton.hammer().on('tap', function() {
 
-                if (confirm("Destroy everything?") == true) {
-                    
+                if (confirm("Nuke it?") == true) {
+
                     // IF SEQUENCE IS PLAYING STOP IT
                     var state = jQuery.data(playButton, "state");
-                    
-                    if(state){
 
-                    	clearRequestInterval(interval);
 
-                     }
+                    if (state) {
+
+                        clearRequestInterval(interval);
+
+                    }
 
                     // RESET ALL VALUES
                     noOfSequences = 1;
                     activeSequence = 0;
 
                     // MOVE POINTER TO 0
-                    var pointer = 0;
-                    var previousPointer = 0;
+                    pointer = 0;
+                    previousPointer = -1;
 
                     // RESET ARRAY
                     var sequenceData = [
@@ -265,9 +293,11 @@ $(document).ready(function() {
                     beat.removeClass("selected active");
                     $(".beat-mini").removeClass("selected");
 
-                    // RESTART SEQUENCE
-                    step();
-                    interval = requestInterval(step, bpmValue);
+                    // RESTART SEQUENCE IF IT WAS STOPPED BY THE PROGRAM
+                    if (state) {
+                        step();
+                        interval = requestInterval(step, 60000 / bpmValue);
+                    }
 
 
                 } else {
@@ -284,7 +314,7 @@ $(document).ready(function() {
 */
             // START SEQUENCE AND SET INTERVAL
         step();
-        interval = requestInterval(step, bpmValue);
+        interval = requestInterval(step, 60000 / bpmValue);
 
     } else {
 
@@ -327,16 +357,6 @@ $(document).ready(function() {
 
 })
 
-
-
-// SETUP BEATS
-function updateBeats(previousPointer, currentPointer) {
-
-    $("#sequence li:eq( " + previousPointer + " )").toggleClass("active");
-    $("#sequence li:eq( " + currentPointer + " )").toggleClass("active");
-
-}
-
 function resizeHandler() {
     windowWidth = w.outerWidth();
     windowHeight = w.outerHeight();
@@ -370,12 +390,12 @@ function resizeHandler() {
         var clearance = (miniSequenceContainerHeight - miniSequenceHeight) * 0.5;
 
         sequenceMini.css({
-            
+
             left: clearance,
             "margin-right": clearance
         });
         $(".beat-mini").css({
-        	height: miniSequenceHeight,
+            height: miniSequenceHeight,
             top: clearance,
             width: miniSequenceHeight
         });
@@ -423,32 +443,49 @@ function resizeHandler() {
 
 function step() {
 
-    // UPDATE POINTER
+    
+    // console.log(" pointer - "+pointer+ " previous Pointer - "+previousPointer+ " active sequence - " +activeSequence + " number of sequences - "+ noOfSequences );
+    // UPDATE POINTER WARNING!!! -> IF YOU WANT TO RESTART THE SEQUENCE OR RESET SET THE PREVIOUSPOINTER TO -1
+
     updateBeats(previousPointer, pointer);
-    //console.log(pointer);
 
     // MOVE TO NEXT SEQUENCE IF MORE THAN ONE UPDATE THE BEATS AND HIGHLIGHT IT
-    if (pointer == 0 && noOfSequences > 1) {
-    	
-    	var previousSequence = activeSequence;
-    	
-    	// REMOVE HIGHLIGHT FROM PREVIOUS SEQUENCE
-		$(".sequence-mini").eq( previousSequence ).removeClass("active");
-		
-		// HIGHLIGHT NEW SEQUENCE
-		activeSequence++;
+    if (pointer == 0 && noOfSequences > 1 && previousPointer !=-1) {
+
+        var previousSequence = activeSequence;
+
+        // REMOVE HIGHLIGHT FROM PREVIOUS SEQUENCE
+        $(".sequence-mini").eq(previousSequence).removeClass("active");
+
+        // HIGHLIGHT NEW SEQUENCE
+        activeSequence++;
         activeSequence = activeSequence % noOfSequences;
-		$(".sequence-mini").eq( activeSequence ).addClass("active");
-        
+        $(".sequence-mini").eq(activeSequence).addClass("active");
+
         console.log(activeSequence + " - " + noOfSequences);
         updateSequence(activeSequence);
 
     }
+
+    // SEND DATA TO SOUNDTHING
+   // if(pointer==0) sendRequest(bpm,sequenceData[activeSequence].join(""));
+
     // MOVE POINTER
     previousPointer = pointer;
     pointer = (pointer + 1) % 8;
 
 
+
+}
+
+
+
+
+// SETUP BEATS
+function updateBeats(previousPointer, currentPointer) {
+//console.log(previousPointer+ " <-P C-> "+currentPointer);
+   if(previousPointer!=-1) $("#sequence li:eq( " + previousPointer + " )").toggleClass("active");
+    $("#sequence li:eq( " + currentPointer + " )").toggleClass("active");
 
 }
 
@@ -461,6 +498,14 @@ function updateSequence(id) {
 
 }
 
+
+function sendRequest(_bpm,_sequence){
+
+        // SEND REQUEST
+         var xhr = new XMLHttpRequest();                        
+         xhr.open('POST','http://'+ipAddress+'/ss.lua?bpm='+35+'&p='+_sequence+"&r="+4,true);                        
+         xhr.send('');
+}
 /*!
  * Behaves the same as setInterval except uses requestAnimationFrame() where possible for better performance
  * modified gist.github.com/joelambert/1002116
@@ -509,24 +554,3 @@ var clearRequestInterval = function(handle) {
         window.clearInterval(handle);
     }
 };
-/*
-
-	function updateTiles()
-	{
-
-
-	}
-
-	function clearTimer()
-	{
-	}
-
-	function updateTimer()
-	{
-		
-
-	}
-
-	Number.prototype.map = function (in_min, in_max, out_min, out_max) {
-  return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}*/
