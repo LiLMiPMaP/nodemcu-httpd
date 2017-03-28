@@ -23,7 +23,7 @@ local function tap()
     gpio.write(0,0)
   end
   beat = beat + 1
-  if beat >= ratio then
+  if beat > ratio then
     beat = 0
     if pattern == "" then
       stop()
