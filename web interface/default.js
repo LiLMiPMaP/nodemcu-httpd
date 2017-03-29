@@ -8,7 +8,7 @@ var windowWidth;
 var windowHeight;
 var noOfSequences = 1;
 var activeSequence = 0;
-var bpmValue = 150;
+var bpmValue = 60;
 var lastBpmValue = bpmValue;
 var interval;
 var playStatus = false;
@@ -113,6 +113,7 @@ $(document).ready(function() {
 
         // Callback function
         onSlideEnd: function(position, value) {
+            console.log(bpmValue )
             if (mode) {
                 bpm.css({
                     width: "5%"
@@ -122,12 +123,15 @@ $(document).ready(function() {
                 // IF BPM HAS CHANGED UPDATE THE SPEED
                 if (bpmValue != lastBpmValue) {
 
-                    // STOP INTERVAL
+                    // STOP INTERVAL IF IT'S PLAYING
+                    if(playStatus)
+                    {
                     clearRequestInterval(interval);
 
                     // RESTART INTERVAL
                     step();
                     interval = requestInterval(step, 15000 / bpmValue);
+                    }
 
                 }
 
@@ -266,7 +270,7 @@ $(document).ready(function() {
             })
             // PLAY/STOP BUTTON
         playButton.hammer().on('tap', function() {
-
+console.log(playStatus);
 
                 if (playStatus) {
                     playStatus = false;

@@ -184,6 +184,14 @@ li.beat.selected.active{
 #button.selected>.circle,li.beat.selected>.circle{
 	background-color:white;
 } 
+li.beat:nth-child(4)
+{
+	border-right:3px solid black;
+}
+li.beat:nth-child(5)
+{
+	border-left:3px solid black;
+}
 #button-container.active{
 	/* background-color:black; */
 }
@@ -228,6 +236,14 @@ background-color:black;
 .beat-mini:nth-last-child(1)
 {
 border-right:2px solid black;
+}
+.beat-mini:nth-child(4)
+{
+border-right:3px solid black;
+}
+.beat-mini:nth-child(5)
+{
+	border-left:3px solid black;
 }
 /*
 //
