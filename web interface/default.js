@@ -12,7 +12,9 @@ var bpmValue = 150;
 var lastBpmValue = bpmValue;
 var interval;
 var playStatus = false;
-var ipAddress = "192.168.100.181";
+var ipAddress = "";
+var ipValid = false;
+var previousSequence = [];
 
 // BPM
 var interval = 500;
@@ -125,7 +127,7 @@ $(document).ready(function() {
 
                     // RESTART INTERVAL
                     step();
-                    interval = requestInterval(step, 60000 / bpmValue);
+                    interval = requestInterval(step, 15000 / bpmValue);
 
                 }
 
@@ -196,9 +198,7 @@ $(document).ready(function() {
 
                 // BIG TILE
                 $(this).toggleClass("selected");
-                //$(".beat-mini")[(activeSequence-1*8)+$(this).index()].toggleClass("selected");
                 // SMALL TILE
-                // $(".beat-mini:eq("+(activeSequence*8)+clickedId+1+")").toggleClass("selected");
                 $(".beat-mini:eq(" + ((activeSequence * 8) + clickedId) + ")").toggleClass("selected");
                 sequenceData[activeSequence][clickedId] = (sequenceData[activeSequence][clickedId] == 1) ? 0 : 1;
 
@@ -256,7 +256,7 @@ $(document).ready(function() {
                     // RESTART SEQUENCE IF IT WAS STOPED BY THE PROGRAM
                     if (playStatus) {
                         step();
-                        interval = requestInterval(step, 60000 / bpmValue);
+                        interval = requestInterval(step, 15000 / bpmValue);
                     }
 
                     // UPDATE SEQUENCE MINI VARIABLE
@@ -275,7 +275,7 @@ $(document).ready(function() {
                 } else {
                     playStatus = true;
                     step();
-                    interval = requestInterval(step, 60000 / bpmValue);
+                    interval = requestInterval(step, 15000 / bpmValue);
                 }
 
                 jQuery.data(playButton, "state", playStatus);
@@ -284,7 +284,7 @@ $(document).ready(function() {
             // CLEAR BUTTON
         clearButton.hammer().on('tap', function() {
 
-            if (confirm("Nuke it?") == true) {
+            if (confirm("Nuke it 💣?") == true) {
 
                 // IF SEQUENCE IS PLAYING STOP IT
                 if (playStatus) {
@@ -322,7 +322,7 @@ $(document).ready(function() {
                 // RESTART SEQUENCE IF IT WAS STOPPED BY THE PROGRAM
                 if (playStatus) {
                     step();
-                    interval = requestInterval(step, 60000 / bpmValue);
+                    interval = requestInterval(step, 15000 / bpmValue);
                 }
 
                 // ACTIVATE FIRST SEQUENCE MINI
@@ -339,20 +339,24 @@ $(document).ready(function() {
 
         updateIP.hammer({}).on('tap', function(e) {
 
-            var tempIP = prompt("Please enter the IP address of your SoundThing");
+            var tempIP = prompt("Please enter the IP address of your SoundThing 🍒");
             var ipValid = ValidateIPaddress(tempIP);
             console.log(ipValid);
             
-
-            if(tempIP == "" ){
-alert('You haven\'t entered anything 😱!');
+            if(tempIP === null){ console.log("canceled");ipValid = false; }
+            else if(tempIP == "" ){
+alert('You didn\'t enter anything 😱');
+ipValid = false;
             }
             else if (ipValid) {
                 ipAddress = tempIP;
+                alert('Awesome! 🤞 and let\'s try connect to this sucker 😘');
+                ipValid = true;
             } 
             else{
 
-                alert('The IP address "' + tempIP + '" is not valid');
+                alert('"'+tempIP + '" is not a valid IP address 😥');
+                ipValid = false;
             }
 
         });
@@ -371,9 +375,10 @@ alert('You haven\'t entered anything 😱!');
         button.hammer({}).on('tap', function(e) {
             console.log("button pressed");
             // SEND REQUEST
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://192.168.100.181/ss.lua?bpm=300&p=1' /*&r=4*/ , true);
-            xhr.send('');
+            /*var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://'+ipAddress+'/ss.lua?bpm=300&p=1'+'&r=4' , true);
+            xhr.send('');*/
+            sendRequest(bpmValue,"1");
             // CHANGE ACTIVE STATE
             buttonContainer.toggleClass("active");
             // CHANGE BACK TO NORMAL STATE   
@@ -515,12 +520,21 @@ function step() {
 
     }
 
-    // SEND DATA TO SOUNDTHING
-    // if(pointer==0) sendRequest(bpm,sequenceData[activeSequence].join(""));
+    // CHECK IF NEW ARRAY IS DIFFERENT FROM PREVIOUS ONE
+
+
+
+
+
+    // SEND DATA TO SOUNDTHING IF POINTER 
+     if(pointer==0 ){ sendRequest(bpmValue,sequenceData[activeSequence].join(""));
+console.log("send");
+ }
 
     // MOVE POINTER
     previousPointer = pointer;
     pointer = (pointer + 1) % 8;
+
 
 
 
@@ -551,10 +565,10 @@ function updateVariables() {
 }
 
 function sendRequest(_bpm, _sequence) {
-
+console.log(_bpm+" "+_sequence);
     // SEND REQUEST
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://' + ipAddress + '/ss.lua?bpm=' + 35 + '&p=' + _sequence + "&r=" + 4, true);
+    xhr.open('POST', 'http://' + "192.168.100.111"/*ipAddress*/ + '/ss.lc?bpm=' + _bpm + '&p=' + _sequence + "&r=" + 4, true);
     xhr.send('');
 }
 /*!
