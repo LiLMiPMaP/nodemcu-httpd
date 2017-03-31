@@ -37,22 +37,26 @@ local function onReceive(connection, req)
   local p = req:match("p=([01]+)")
   if p then pattern = p end
 
-  local r = req:match("r=([1-9])")
-  if r then ratio = tonumber(r) end
+  p = req:match("r=([1-9])")
+  if p then ratio = tonumber(p) end
 
-  local bpm = req:match("bpm=([0-9]+)")
-  if bpm and pattern then
+  p = req:match("bpm=([0-9]+)")
+  if p and pattern then
+
+    local ms = req:match("ms=([[0-9]+)")
+    if ms then ms = ms*p ratio = (15000+ms/2)/ms end
 
     if not timer then
-      print("Started bpm="..bpm)
+      print("Started bpm="..p)
       timer = tmr.create()
     else
-      print("New bpm="..bpm)
+      print("New bpm="..p)
       timer:unregister()
     end
 
     tap()
-    timer:alarm(15000/(bpm*ratio), tmr.ALARM_AUTO, tap)
+    p = p*ratio
+    timer:alarm((15000+p/2)/p, tmr.ALARM_AUTO, tap)
   else
 
     stop()
