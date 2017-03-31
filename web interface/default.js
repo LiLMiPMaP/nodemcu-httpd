@@ -455,7 +455,6 @@ function resizeHandler() {
             "font-size": (windowWidth * 0.05) + "px"
         });
 // CHECK ORIENTATION
-setTimeout(function(){
 console.log(windowWidth+" - "+windowHeight)
     if(windowWidth<windowHeight)
   {
@@ -470,7 +469,6 @@ console.log("show");
 orient.addClass("hide");
   }
 
-},50)
 
 
     } else {
