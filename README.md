@@ -31,4 +31,3 @@ curl --data anything http://serial.console.shows.ip/
 
 ## TODO
 * Need a way to return flash contents/listing vs. `index.html`
-

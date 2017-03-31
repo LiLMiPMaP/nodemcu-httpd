@@ -1,0 +1,339 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html {
+  height: 100%;
+
+}
+body {
+	 width: 100%;
+	 height:100%;
+    font-family: Arial, Helvetica;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position:fixed;
+    overflow: hidden;
+}
+div {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    }
+#wrapper{
+	width:100%;
+	height:100%;
+	margin:0;
+	padding:0;
+	position: absolute;
+}
+#orientation-warning
+{
+	position:absolute;
+	width:100%;
+	height:100%;
+	background:transparent url("assets/pattern_active.png") repeat scroll 0% 0%;
+	z-index:2000;
+}
+.hide{
+	display:none;
+}
+
+/*
+//
+//  CONTAINERS
+//
+*/
+
+#bpm-container, #speed-container, #single-sequence-container, #all-sequences-container, #controls-container, #button-container
+{
+border:1px solid #999999;
+position:absolute;
+}
+
+#bpm-container
+{
+	height:85%;
+	width:5%;
+	z-index:100;
+	background:black;
+}
+#button-container
+{
+	width:100%;
+	height:100%;
+}
+#speed-container
+{
+	height:100%;
+	width:5%;
+	z-index:1000;
+	background:black;
+}
+#single-sequence-container
+{height:75%;
+	width:95%;
+	left:5%;
+}
+#all-sequences-container
+{
+	top:75%;
+	width:95%;
+	height:10%;
+	left:5%;
+	    white-space: nowrap;
+	overflow-x:scroll;
+}
+#controls-container
+{
+	top:85%;
+	width:100%;
+	height:15%;
+	left:0;
+}
+#button-mode #controls-container
+{
+	border:none;
+}
+/*
+//
+//  COMPONENTS
+//
+*/
+#bpm-value{
+    position: absolute;
+    width: 100%;
+    color: white;
+    bottom:0;
+    z-index: 1000;
+    text-align: center;
+
+display:none;
+
+}
+#bpm-value.visible{
+display:block;
+}
+#speed-value{
+   position: absolute;
+    width: 100%;
+    color: white;
+    bottom:0;
+    z-index: 1000;
+    text-align: center;
+
+display:none;
+}
+ 
+ #speed-value.visible{
+display:block;
+}
+/*
+//
+// SEQUENCE 
+//
+*/
+
+#single-sequence-container{
+	}
+#sequence-active
+{
+position: relative;
+height:100%;
+	
+}
+
+ul#sequence{
+position: relative;
+height:100%;
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
+  display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
+}
+
+li.beat{
+list-style: none;
+height:100%;
+display: inline-block;
+border:1px solid #999999;
+}
+
+.circle
+{
+	background-color:white;
+	position:relative;
+	width:33%;
+	border: solid 2px black;/**/
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 50%;
+
+}
+
+li.beat>.circle
+{
+
+	background-color:black;
+	
+}
+
+li.beat.selected{
+	background-color:black;
+} 
+li.beat.active{
+	background:transparent url("assets/pattern_active.png") repeat scroll 0% 0%;
+	background-size:25px 25px;
+}
+li.beat.selected.active{
+	background:transparent url("assets/pattern_active_selected.png") repeat scroll 0% 0%;
+		background-size:25px 25px;
+}
+#button.selected>.circle,li.beat.selected>.circle{
+	background-color:white;
+} 
+li.beat:nth-child(4)
+{
+	border-right:3px solid black;
+}
+li.beat:nth-child(5)
+{
+	border-left:3px solid black;
+}
+#button-container.active{
+	/* background-color:black; */
+}
+#button-container.active #button{
+	background-color:white;
+}
+#button-container.active #button .circle{
+	background-color:black;
+}
+/*
+//
+// ALL SEQUENCES
+//
+*/
+.sequence-mini
+{
+	height: 100%;
+	        top: 0;
+	display: inline-block;
+position:relative;
+border-collapse: collapse;
+}
+.sequence-mini.active
+{
+background-color:black;
+}
+
+.beat-mini
+{
+	position:relative;
+	height:100%;
+	display: inline-block;
+border:2px solid black;
+border-right:none;
+
+background-color:white;
+}
+.beat-mini.selected
+{
+background-color:black;
+}
+.beat-mini:nth-last-child(1)
+{
+border-right:2px solid black;
+}
+.beat-mini:nth-child(4)
+{
+border-right:3px solid black;
+}
+.beat-mini:nth-child(5)
+{
+	border-left:3px solid black;
+}
+/*
+//
+// BUTTONS 
+//
+*/
+#controls-container
+{
+	position:absolute;
+}
+
+#button-set-1, 
+#button-set-2,
+#button-set-3
+{
+	position: absolute;
+	height:100%;
+	/*border:1px solid red;*/
+	display: inline-block;
+}
+
+#button-set-1
+{
+width:45%;
+}
+#button-set-2
+{
+left:45%;
+
+	width:30%;
+}
+#button-set-3
+{
+left:75%;
+width:25%;
+}
+
+#play-stop,
+#clear-all,
+#add,
+#remove,
+#switch-UI
+{
+}
+.icon
+{
+
+position:relative;
+display:inline-block;
+}
+.icon>img
+{
+	width:100%;
+	height:100%;
+}
+#play-pause
+{
+
+}
+#clear-all
+{
+}
+#add
+{
+
+}
+#remove
+{
+
+}
+#switch-UI
+{
+float:right;
+}
+
+#button
+{
+	position:relative;
+border:5px solid black;
+background-color:black;
+}
