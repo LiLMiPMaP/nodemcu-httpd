@@ -41,6 +41,7 @@ div {
 .hide{
 	display:none;
 }
+
 /*
 //
 //  CONTAINERS
@@ -69,7 +70,7 @@ position:absolute;
 {
 	height:100%;
 	width:5%;
-	z-index:100;
+	z-index:1000;
 	background:black;
 }
 #single-sequence-container
@@ -93,7 +94,10 @@ position:absolute;
 	height:15%;
 	left:0;
 }
-
+#button-mode #controls-container
+{
+	border:none;
+}
 /*
 //
 //  COMPONENTS

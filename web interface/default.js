@@ -9,6 +9,7 @@ var windowHeight;
 var noOfSequences = 1;
 var activeSequence = 0;
 var bpmValue = 60;
+var speedValue = 40;
 var lastBpmValue = bpmValue;
 var interval;
 var playStatus = false;
@@ -23,7 +24,7 @@ var interval = 500;
 var pointer = 0;
 var previousPointer = -1;
 // ELEMENTS
-var orient,bpm, bpmValueText, sequence, beat, circle, controls, icons, w, buttonContainer, button, allSequencesContainer, sequenceMini, beatMini, playButton, clearButton, addButton, removeButton, updateIP, changeColour;
+var orient,bpm, bpmValueText,speed,speedText, sequence, beat, circle, controls, icons, w, buttonContainer, button, allSequencesContainer, sequenceMini, beatMini, playButton, clearButton, addButton, removeButton, updateIP, changeColour;
 
 // SEQUENCER
 var sequenceData = [
@@ -40,6 +41,8 @@ $(document).ready(function() {
     orient = $("#orientation-warning");
     bpm = $("#bpm-container");
     bpmValueText = $("#bpm-value");
+    speed = $("#speed-container");
+    speedText = $("#speed-value");
     sequence = $("#sequence");
     beat = $("#sequence li");
     circle = $(".circle");
@@ -91,7 +94,7 @@ $(document).ready(function() {
         polyfill: false,
         // Callback function
         onInit: function() {
-
+console.log("loaded");
         },
 
         // Callback function
@@ -114,7 +117,19 @@ $(document).ready(function() {
                     color: "white"
                 });
             } else {
+speed.css({
+                    width: "10%"
+                });
 
+                speedValue = value;
+                speedText.text(value);
+                speedText.addClass("visible").css((value < 150) ? {
+                    bottom: "inherit",
+                    color: "black"
+                } : {
+                    bottom: "0",
+                    color: "white"
+                });
             }
 
         },
@@ -145,6 +160,11 @@ $(document).ready(function() {
 
                 lastBpmValue = bpmValue;
             } else {
+
+                 speed.css({
+                    width: "5%"
+                });
+                speedValueText.removeClass("visible");
 
             }
         }
@@ -274,6 +294,7 @@ $(document).ready(function() {
 
                 }
             })
+        
             // PLAY/STOP BUTTON
         playButton.hammer().on('tap', function() {
 
@@ -281,6 +302,7 @@ $(document).ready(function() {
                 else play(true);
 
             })
+
             // CLEAR BUTTON
         clearButton.hammer().on('tap', function() {
 
@@ -375,8 +397,7 @@ $(document).ready(function() {
         button.hammer({}).on('tap', function(e) {
             console.log("button pressed");
             // SEND REQUEST
-            sendRequest(300, 1);
-            if(ipAddress!="") sendRequest(bpmValue,"1");
+            if(ipAddress!="") sendRequest();
             // CHANGE ACTIVE STATE
             buttonContainer.toggleClass("active");
             // CHANGE BACK TO NORMAL STATE   
@@ -638,12 +659,23 @@ function play( status )
     }
 }
 
-function sendRequest(_bpm, _sequence) {
-console.log(_bpm+" "+_sequence);
+function sendRequest(_bpm, _sequence, _ms) {
 
+
+if( typeof _ms === 'undefined' ) {
+    _ms = "40"
+}
+if( typeof _sequence === 'undefined' ) {
+    _sequence = "1"
+}
+if( typeof _bpm === 'undefined' ) {
+    _bpm = "200"
+}
+console.log(_bpm+" "+_sequence);
+console.log(_ms);
     // SEND REQUEST
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://' + ipAddress + '/ss.lc?bpm=' + _bpm + '&p=' + _sequence + "&ms=40", true);
+    xhr.open('POST', 'http://' + ipAddress + '/ss.lc?bpm=' + _bpm + '&p=' + _sequence + "&ms="+_ms, true);
     xhr.send('');
 }
 /*!
