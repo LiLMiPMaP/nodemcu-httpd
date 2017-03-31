@@ -23,7 +23,7 @@ local function tap()
     gpio.write(0,0)
   end
   beat = beat + 1
-  if beat > ratio then
+  if beat >= ratio then
     beat = 0
     if pattern == "" then
       stop()
@@ -32,7 +32,7 @@ local function tap()
 end
 
 
-return function(connection, req)
+local function onReceive(connection, req)
 
   local p = req:match("p=([01]+)")
   if p then pattern = p end
@@ -58,6 +58,12 @@ return function(connection, req)
     stop()
   end
 
-  connection:send("HTTP/1.1 204 No Content\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: POST,OPTIONS\r\nConnection: close\r\n\r\n", function(c) c:close() end)
+  connection:send("HTTP/1.1 204 No Content\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: POST,OPTIONS\r\nConnection: keep-alive\r\n\r\n")
   collectgarbage()
+end
+
+
+return function(connection, req)
+  connection:on("receive", onReceive)
+  onReceive(connection, req)
 end
