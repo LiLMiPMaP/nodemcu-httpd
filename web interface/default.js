@@ -168,11 +168,7 @@ speed.css({
 
             }
         }
-    });;
-
-    // $('input').on('input', function () {    
-    //     console.log($(this).val());
-    // });
+    });
 
 
 
@@ -422,11 +418,6 @@ speed.css({
 
 })
 
-/*
-INT -> 400/BPM
-
-*/
-
 function resizeHandler() {
    
     windowWidth = w.outerWidth();
@@ -434,9 +425,6 @@ function resizeHandler() {
 
     if (mode) {
 
-        // BPM
-        //lastFillHeight = bpmFill.height();
-        //fillMaxHeight = windowHeight * 0.85;
 
         // BEAT 
         beatWidth = (100 / noOfBeatsInSequence);
@@ -476,17 +464,17 @@ function resizeHandler() {
             "font-size": (windowWidth * 0.05) + "px"
         });
 // CHECK ORIENTATION
-console.log(windowWidth+" - "+windowHeight)
+//console.log(windowWidth+" - "+windowHeight)
     if(windowWidth<windowHeight)
   {
-console.log("hide");
+//console.log("hide");
 orient.removeClass("hide");
 
 
   }
   else{
 
-console.log("show");
+//console.log("show");
 orient.addClass("hide");
   }
 
@@ -514,7 +502,7 @@ orient.addClass("hide");
         });
 
 
-        console.log(size + " - " + windowWidth + " - " + windowHeight);
+        //console.log(size + " - " + windowWidth + " - " + windowHeight);
     }
     // ICONS
     var controlsSize = windowHeight * 0.15 * 0.8;
@@ -561,7 +549,7 @@ if(windowWidth<windowHeight)
 function step() {
 
 
-    // console.log(" pointer - "+pointer+ " previous Pointer - "+previousPointer+ " active sequence - " +activeSequence + " number of sequences - "+ noOfSequences );
+    // //console.log(" pointer - "+pointer+ " previous Pointer - "+previousPointer+ " active sequence - " +activeSequence + " number of sequences - "+ noOfSequences );
     // UPDATE POINTER WARNING!!! -> IF YOU WANT TO RESTART THE SEQUENCE OR RESET SET THE PREVIOUSPOINTER TO -1
 
     updateBeats(previousPointer, pointer);
@@ -579,7 +567,7 @@ function step() {
         activeSequence = activeSequence % noOfSequences;
         sequenceMini.eq(activeSequence).addClass("active");
 
-        console.log(sequenceMini.eq(previousSequence));
+        //console.log(sequenceMini.eq(previousSequence));
         updateSequence(activeSequence);
 
     }
@@ -590,7 +578,7 @@ function step() {
 
     // SEND DATA TO SOUNDTHING IF POINTER 
      if(pointer==0 && ipAddress!=""){ sendRequest(bpmValue,sequenceData[activeSequence].join(""));
-console.log("send");
+//console.log("send");
  }
 
     // MOVE POINTER
@@ -606,7 +594,7 @@ console.log("send");
 
 // SETUP BEATS
 function updateBeats(previousPointer, currentPointer) {
-    //console.log(previousPointer+ " <-P C-> "+currentPointer);
+    ////console.log(previousPointer+ " <-P C-> "+currentPointer);
     if (previousPointer != -1) $("#sequence li:eq( " + previousPointer + " )").toggleClass("active");
     $("#sequence li:eq( " + currentPointer + " )").toggleClass("active");
 
@@ -671,8 +659,8 @@ if( typeof _sequence === 'undefined' ) {
 if( typeof _bpm === 'undefined' ) {
     _bpm = "200"
 }
-console.log(_bpm+" "+_sequence);
-console.log(_ms);
+//console.log(_bpm+" "+_sequence);
+//console.log(_ms);
     // SEND REQUEST
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'http://' + ipAddress + '/ss.lc?bpm=' + _bpm + '&p=' + _sequence + "&ms="+_ms, true);
@@ -737,9 +725,9 @@ var clearRequestInterval = function(handle) {
     for (var i = 0; i < 8; i++) 
     {
         if(a[i] == b[i] ) 
-            console.log("same");
+            //console.log("same");
         else 
-            console.log("different");
+            //console.log("different");
     }
 }*/
 
