@@ -15,6 +15,7 @@ var playStatus = false;
 var ipAddress = "";
 var ipValid = false;
 var previousSequence = [];
+var sliding = false;
 
 // BPM
 var interval = 500;
@@ -22,8 +23,7 @@ var interval = 500;
 var pointer = 0;
 var previousPointer = -1;
 // ELEMENTS
-var bpm, bpmValueText, sequence, beat, circle, controls, icons, w, buttonContainer, button, allSequencesContainer, sequenceMini, beatMini, playButton, clearButton, addButton, removeButton, updateIP, changeColour;
-
+var orient,bpm, bpmValueText, sequence, beat, circle, controls, icons, w, buttonContainer, button, allSequencesContainer, sequenceMini, beatMini, playButton, clearButton, addButton, removeButton, updateIP, changeColour;
 
 // SEQUENCER
 var sequenceData = [
@@ -31,11 +31,13 @@ var sequenceData = [
 ];
 
 $(document).ready(function() {
+    
 
     mode = ($('#sequence-mode')[0] != undefined) ? true : false;
 
     // ELEMENTS
     w = $(window);
+    orient = $("#orientation-warning");
     bpm = $("#bpm-container");
     bpmValueText = $("#bpm-value");
     sequence = $("#sequence");
@@ -46,14 +48,16 @@ $(document).ready(function() {
     buttonContainer = $("#button-container");
     button = $("#button");
     allSequencesContainer = $('#all-sequences-container');
-    playButton = $("#play-stop");
+    playButton = $("#play-pause");
     addButton = $("#add");
     clearButton = $("#clear-all");
     removeButton = $("#remove");
     updateIP = $("#update-ip");
     console.log(updateIP);
     changeColour = $('#change-colour');
+    ipAddress = (localStorage.getItem("ipAddress")==null)? "":localStorage.getItem("ipAddress");
 
+    console.log( ipAddress );
 
     // ASSIGN DATA TO PLAYBUTTON
     jQuery.data(playButton, "state", playStatus);
@@ -92,10 +96,14 @@ $(document).ready(function() {
 
         // Callback function
         onSlide: function(position, value) {
+            console.log("sliding")
+            
+
             if (mode) {
                 bpm.css({
                     width: "10%"
                 });
+
                 bpmValue = value;
                 bpmValueText.text(value);
                 bpmValueText.addClass("visible").css((value < 150) ? {
@@ -113,27 +121,27 @@ $(document).ready(function() {
 
         // Callback function
         onSlideEnd: function(position, value) {
-            console.log(bpmValue )
+            console.log("nosliding")
             if (mode) {
                 bpm.css({
                     width: "5%"
                 });
                 bpmValueText.removeClass("visible");
 
-                // IF BPM HAS CHANGED UPDATE THE SPEED
-                if (bpmValue != lastBpmValue) {
+                // WHEN WE STOP SLIDING STOP TIMER IF IT'S PLAYING UPDATE BPM AND RESTART TIMER 
+            if(playStatus)
+            {
 
-                    // STOP INTERVAL IF IT'S PLAYING
-                    if(playStatus)
-                    {
-                    clearRequestInterval(interval);
+                // STOP TIMER
+                play(false);
 
-                    // RESTART INTERVAL
-                    step();
-                    interval = requestInterval(step, 15000 / bpmValue);
-                    }
+                // RESTART TIMER
+                play(true);
 
-                }
+            }
+            else{
+
+            }
 
                 lastBpmValue = bpmValue;
             } else {
@@ -195,6 +203,12 @@ $(document).ready(function() {
         //
         */
 
+
+    $( window ).on( "orientationchange", checkOrientation);
+    
+
+
+
         // BEAT
         beat.hammer().on('tap', function() {
 
@@ -234,8 +248,6 @@ $(document).ready(function() {
                     // IF WE REMOVE THE ONE WE ARE PLAYING GO TO THE START
                     if (noOfSequences - 1 == activeSequence) {
 
-                        if (playStatus) clearRequestInterval(interval);
-
                         activeSequence = 0;
 
                         //CLEAR ACTIVE BEATS
@@ -257,12 +269,6 @@ $(document).ready(function() {
                     noOfSequences--;
                     sequenceData.pop();
 
-                    // RESTART SEQUENCE IF IT WAS STOPED BY THE PROGRAM
-                    if (playStatus) {
-                        step();
-                        interval = requestInterval(step, 15000 / bpmValue);
-                    }
-
                     // UPDATE SEQUENCE MINI VARIABLE
                     updateVariables();
 
@@ -270,20 +276,10 @@ $(document).ready(function() {
             })
             // PLAY/STOP BUTTON
         playButton.hammer().on('tap', function() {
-console.log(playStatus);
 
-                if (playStatus) {
-                    playStatus = false;
-                    clearRequestInterval(interval);
+                if (playStatus) play(false);
+                else play(true);
 
-                } else {
-                    playStatus = true;
-                    step();
-                    interval = requestInterval(step, 15000 / bpmValue);
-                }
-
-                jQuery.data(playButton, "state", playStatus);
-                console.log(playStatus);
             })
             // CLEAR BUTTON
         clearButton.hammer().on('tap', function() {
@@ -291,11 +287,7 @@ console.log(playStatus);
             if (confirm("Nuke it 💣?") == true) {
 
                 // IF SEQUENCE IS PLAYING STOP IT
-                if (playStatus) {
-
-                    clearRequestInterval(interval);
-
-                }
+                if (playStatus) play(false);
 
                 // RESET ALL VALUES
                 noOfSequences = 1;
@@ -323,12 +315,6 @@ console.log(playStatus);
                 beat.removeClass("selected active");
                 beatMini.removeClass("selected");
 
-                // RESTART SEQUENCE IF IT WAS STOPPED BY THE PROGRAM
-                if (playStatus) {
-                    step();
-                    interval = requestInterval(step, 15000 / bpmValue);
-                }
-
                 // ACTIVATE FIRST SEQUENCE MINI
                 sequenceMini.addClass("active");
 
@@ -343,17 +329,27 @@ console.log(playStatus);
 
         updateIP.hammer({}).on('tap', function(e) {
 
-            var tempIP = prompt("Please enter the IP address of your SoundThing 🍒");
+            var tempIP = prompt("Please enter the IP address of your SoundThing 🍒",(ipAddress=="")? "":ipAddress);
             var ipValid = ValidateIPaddress(tempIP);
             console.log(ipValid);
             
-            if(tempIP === null){ console.log("canceled");ipValid = false; }
+            if(tempIP === null){
+
+                console.log("canceled");
+                ipValid = false; 
+            
+            }
             else if(tempIP == "" ){
-alert('You didn\'t enter anything 😱');
-ipValid = false;
+
+                alert('You didn\'t enter anything 😱');
+                ipValid = false;
+            
             }
             else if (ipValid) {
                 ipAddress = tempIP;
+                // SAVE IT TO LOCAL STORAGE
+                localStorage.setItem("ipAddress", ipAddress);
+
                 alert('Awesome! 🤞 and let\'s try connect to this sucker 😘');
                 ipValid = true;
             } 
@@ -379,10 +375,8 @@ ipValid = false;
         button.hammer({}).on('tap', function(e) {
             console.log("button pressed");
             // SEND REQUEST
-            /*var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://'+ipAddress+'/ss.lua?bpm=300&p=1'+'&r=4' , true);
-            xhr.send('');*/
-            sendRequest(bpmValue,"1");
+            sendRequest(300, 1);
+            if(ipAddress!="") sendRequest(bpmValue,"1");
             // CHANGE ACTIVE STATE
             buttonContainer.toggleClass("active");
             // CHANGE BACK TO NORMAL STATE   
@@ -403,14 +397,17 @@ ipValid = false;
     //
     */
 
-    window.addEventListener("resize", function() {
-        resizeHandler();
-
-    }, false);
+    window.addEventListener("resize", resizeHandler, false);
 
 })
 
+/*
+INT -> 400/BPM
+
+*/
+
 function resizeHandler() {
+   
     windowWidth = w.outerWidth();
     windowHeight = w.outerHeight();
 
@@ -457,6 +454,23 @@ function resizeHandler() {
         bpmValueText.css({
             "font-size": (windowWidth * 0.05) + "px"
         });
+// CHECK ORIENTATION
+setTimeout(function(){
+console.log(windowWidth+" - "+windowHeight)
+    if(windowWidth<windowHeight)
+  {
+console.log("hide");
+orient.removeClass("hide");
+
+
+  }
+  else{
+
+console.log("show");
+orient.addClass("hide");
+  }
+
+},50)
 
 
     } else {
@@ -498,6 +512,33 @@ function resizeHandler() {
 
 }
 
+function checkOrientation()
+{
+
+ 
+  /*  windowWidth = w.outerWidth();
+    windowHeight = w.outerHeight();
+setTimeout(function(){
+if(windowWidth<windowHeight)
+  {
+  windowWidth = w.outerWidth();
+    windowHeight = w.outerHeight();
+    alert("bad")
+
+  }
+
+},100);*/
+//alert(windowWidth +" - "+windowHeight);
+/*if(windowWidth<windowHeight)
+  {
+
+    alert("bad")
+
+  }*/
+
+
+}
+
 function step() {
 
 
@@ -524,14 +565,12 @@ function step() {
 
     }
 
-    // CHECK IF NEW ARRAY IS DIFFERENT FROM PREVIOUS ONE
-
-
-
+    // CHECK IF NEW ARRAY IS DIFFERENT FROM PREVIOUS ONE IF YES SEND THE CHANGED PART
+    
 
 
     // SEND DATA TO SOUNDTHING IF POINTER 
-     if(pointer==0 ){ sendRequest(bpmValue,sequenceData[activeSequence].join(""));
+     if(pointer==0 && ipAddress!=""){ sendRequest(bpmValue,sequenceData[activeSequence].join(""));
 console.log("send");
  }
 
@@ -568,11 +607,45 @@ function updateVariables() {
     beatMini = $(".beat-mini");
 }
 
+function play( status )
+{
+    // IF TRUE START PLAYING
+    if(status){
+
+    // UPDATE BUTTONS
+    playButton.children().eq(0).addClass("hide");
+    playButton.children().eq(1).removeClass("hide");
+
+    // START INTERVAL
+    step();
+    interval = requestInterval(step, 15000 / bpmValue);
+
+    // UPDATE VARIABLES
+    playStatus = true;
+    jQuery.data(playButton, "state", playStatus);
+
+    }else{
+
+    // UPDATE BUTTONS
+    playButton.children().eq(0).removeClass("hide");
+    playButton.children().eq(1).addClass("hide");
+
+    // STOP INTERVAL
+    clearRequestInterval(interval);
+
+    // UPDATE VARIABLES
+    playStatus = false;
+    jQuery.data(playButton, "state", playStatus);    
+
+    }
+}
+
 function sendRequest(_bpm, _sequence) {
 console.log(_bpm+" "+_sequence);
+
     // SEND REQUEST
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://' + "192.168.100.111"/*ipAddress*/ + '/ss.lc?bpm=' + _bpm + '&p=' + _sequence + "&r=" + 4, true);
+    xhr.open('POST', 'http://' + ipAddress + '/ss.lc?bpm=' + _bpm + '&p=' + _sequence + "&ms=40", true);
     xhr.send('');
 }
 /*!
@@ -623,6 +696,22 @@ var clearRequestInterval = function(handle) {
         window.clearInterval(handle);
     }
 };
+
+/*function compare(_old,_new)
+{
+    if(_old.length()!=_new.length())
+    {
+        return _new
+    }
+
+    for (var i = 0; i < 8; i++) 
+    {
+        if(a[i] == b[i] ) 
+            console.log("same");
+        else 
+            console.log("different");
+    }
+}*/
 
 function ValidateIPaddress(inputValue) {
     var re = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
