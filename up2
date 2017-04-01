@@ -1,4 +1,4 @@
-./up1 "$1" init.lua httpserver.lua ss.lua format.lua || exit 1
+./up1 "$1" init.lua httpserver.lua ss.lua format.lua setup.lua setup.html || exit 1
 find *.html css/*.css js/*.js | xargs gzip -k9f
 find assets/* | xargs ./up1 "$1/assets/" || exit 1
 find *.gz | xargs ./up1 "$1" || exit 1

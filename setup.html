@@ -27,7 +27,7 @@ function poll_for_ip(ssid, mac) {
 
     get_ip(mac, function(err, json) {
 
-        document.getElementById('error').innerText = err?err+". Please connect to the "+ssid+" Wi-Fi":'Waiting for SoundThing to connect...';
+        document.getElementById('error').innerText = err?err+". Please connect to the "+ssid+" Wi-Fi.":'Waiting for SoundThing to connect...';
         if (json) {
             var obj = JSON.parse(json);
             // if (obj.now && !startTime) {
@@ -87,5 +87,6 @@ window.addEventListener('load', init);
     <input id='submit' type='button' value="Reconnect" />
 </p>
 <div id='error' style="color:red;"></div>
+<a href="/index.html">Just wanna drum!</a>
 </body>
 </html>
