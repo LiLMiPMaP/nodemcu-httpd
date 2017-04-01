@@ -1,0 +1,91 @@
+<html>
+<head>
+<script type="text/javascript">
+
+var startTime = new Date();
+
+function get_ip(mac, callback) {
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://soundswarm.azurewebsites.net/ip?mac='+encodeURIComponent(mac)+"&rnd="+Math.random(), true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            var json = xhr.responseText;
+            if (json) {
+                callback(null, json);
+            }
+            else {
+                callback("Error "+xhr.statusText);
+            }
+        }
+    };
+    xhr.send();
+}
+
+
+function poll_for_ip(ssid, mac) {
+
+    get_ip(mac, function(err, json) {
+
+        document.getElementById('error').innerText = err?err+". Please connect to the "+ssid+" Wi-Fi":'Waiting for SoundThing to connect...';
+        if (json) {
+            var obj = JSON.parse(json);
+            // if (obj.now && !startTime) {
+            //     startTime = Date.parse(obj.now);
+            // }
+            // Check the time, redirect if newer
+            if (obj.ip && Date.parse(obj.utc) > startTime) {
+                // Redirect to final site
+                window.location = "http://"+obj.ip;
+            }
+        }
+    });
+}
+
+
+function submit(e) {
+
+    e.target.disabled = true;
+
+    var ssid = document.getElementById('ssid').value;
+    var pw = document.getElementById('pw').value;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/setup.lua?ssid='+ssid+"&pw="+pw, true);
+    xhr.onreadystatechange = function() {
+
+        if (xhr.readyState === 4) {
+            var mac = xhr.responseText;
+            if (mac) {
+                e.target.value = "Reconnecting...";
+
+                setInterval(function() {
+                    poll_for_ip(ssid, mac);
+                }, 2000);
+            }
+        }
+    };
+    xhr.send('')
+}
+
+function init() {
+    document.getElementById('submit').addEventListener('click', submit);
+    document.getElementById('ssid').focus();
+}
+
+window.addEventListener('load', init);
+</script>
+</head>
+<body>
+<h1>Welcome to your SoundThing!</h1>
+<p>
+    <input id='ssid' type='text' placeholder="SSID"/>
+</p>
+<p>
+    <input id='pw' type='text' placeholder="Password" autocomplete="off"/>
+</p>
+<p>
+    <input id='submit' type='button' value="Reconnect" />
+</p>
+<div id='error' style="color:red;"></div>
+</body>
+</html>
