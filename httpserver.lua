@@ -9,10 +9,12 @@
 -- TODO: need a way to return flash contents vs. index.html
 
 local requests = {}
+local indexhtml = "index.html"
 
 local function close(c)
   c:close()
 end
+
 
 local function onConnect(connection)
 
@@ -81,7 +83,7 @@ local function onConnect(connection)
           -- If you want your function to receive any other packets as well, do this:
           --connection:on("receive", func)
         else
-          connection:send("HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n", close)
+          connection:send("HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n", close)
         end
       end
     elseif method == "GET" then
@@ -99,6 +101,7 @@ local function onConnect(connection)
         collectgarbage()
         if #requests == 0 then return end
         local connection, uri = unpack(requests[1])
+        print(uri)
 
         -- Send the file contents to the client
         local headers = "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n"
@@ -131,7 +134,7 @@ local function onConnect(connection)
 
       -- Default document handler
       if uri == "" then
-        uri = "index.html"
+        uri = indexhtml
       end
 
       table.insert(requests, { connection, uri })
@@ -149,7 +152,7 @@ local function onConnect(connection)
 end
 
 
-return function (port)
+return function (port, index)
 
   local s = net.createServer(net.TCP, 28800) -- 10 seconds client timeout
   s:listen(port, onConnect)
@@ -160,6 +163,10 @@ return function (port)
   if not ip then ip = wifi.ap.getip() mac = wifi.ap.getmac() end
 
   print("nodemcu-httpd running at http://" .. ip .. ":" ..  port)
+
+  if index then
+    indexhtml = index
+  end
 
   -- register with backend
   local http = net.createConnection(net.TCP, 0)
