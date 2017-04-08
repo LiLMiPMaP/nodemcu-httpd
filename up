@@ -1,2 +1,3 @@
-python nodemcu-uploader/nodemcu-uploader.py --start_baud 9600 --baud 9600 upload init.lua httpserver.lua && python --start_baud 9600 --baud 9600 nodemcu-uploader/nodemcu-uploader.py node restart
+ARGS=--start_baud 115200 --baud 9600
+python nodemcu-uploader/nodemcu-uploader.py $ARGS upload init.lua httpserver.lua && python nodemcu-uploader/nodemcu-uploader.py $ARGS node restart
 
