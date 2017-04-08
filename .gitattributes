@@ -1,0 +1,6 @@
+nodemcu-master-11-modules-2016-01-08-11-48-08-float.bin filter=lfs diff=lfs merge=lfs -text
+nodemcu-master-11-modules-2016-01-08-11-48-08-integer.bin filter=lfs diff=lfs merge=lfs -text
+nodemcu-master-12-modules-2017-03-12-13-18-25-integer.bin filter=lfs diff=lfs merge=lfs -text
+nodemcu-master-19-modules-2016-09-18-14-15-50-float.bin filter=lfs diff=lfs merge=lfs -text
+nodemcu-master-19-modules-2016-09-18-14-15-50-integer.bin filter=lfs diff=lfs merge=lfs -text
+nodemcu-master-8-modules-2016-09-18-15-52-39-integer.bin filter=lfs diff=lfs merge=lfs -text
