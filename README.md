@@ -1,3 +1,4 @@
+
 # Small HTTP server for NodeMCU
 This small webserver supports the following HTTP verbs/methods:
 * GET returns the contents of a file in flash
@@ -7,6 +8,21 @@ This small webserver supports the following HTTP verbs/methods:
 * OPTIONS returns minimal CORS headers allowing POST from any origin
 
 ## Installation
+# FLASH FIRMWARE (CONNECT D3>GND)
+./flash
+
+# UPLOAD HTTP SERVER (REMOVE D3>GND)
+install pyserial
+./up
+Connect to SoundThing_XXXXXX Wi-Fi
+./up2 192.168.4.1
+Rebbot soundthing
+
+Open browser and go to
+http://192.168.4.1
+ENTER SSID/PASSWORD
+CONNECT BACK TO PREVIOUS SSID
+
 Clone the project and edit the Wi-Fi settings in `init.lua`. You can use the shell script `up` or execute the following:
 ```
 $ python nodemcu-uploader/nodemcu-uploader.py upload init.lua httpserver.lua
@@ -31,3 +47,5 @@ curl --data anything http://serial.console.shows.ip/
 
 ## TODO
 * Need a way to return flash contents/listing vs. `index.html`
+
+
